@@ -1,4 +1,3 @@
-import kotlin.math.pow
 import kotlin.random.Random
 fun main()
 {
@@ -34,7 +33,8 @@ fun task1()
     val rows = readln().toInt()
     print("Введите количество столбцов: ")
     val cols = readln().toInt()
-    val table =  Array(rows) {Array(cols){Random.nextInt(100,1000)} }
+    println("Введите числа в столбик: ")
+    val table =  Array(rows) {Array(cols){0} }
     val digits = mutableSetOf<Char>()
     for (i in 0 until rows)
     {
@@ -42,19 +42,16 @@ fun task1()
         {
             val elements = readln().toInt()
             table[i][j] = elements
-            elements.toString().forEach {digits.add(it)}
+            elements.toString().filter { it.isDigit() }.forEach { digits.add(it) }
         }
     }
     println("Двумерный массив: ")
     for(i in 0 until rows)
     {
-        for (j in 0 until cols)
-        {
-            println("${table[i][j]}")
-        }
+        println(table[i].joinToString (" "))
         println()
     }
-    println("В мыссиве использовано ${digits.size} различных цифр")
+    println("В мыссиве использованно ${digits.size} различных цифр")
 }
 
 
@@ -93,59 +90,71 @@ if (symetr)
 
 fun task3()
 {
-
+    val alphabet = listOf(
+        'А','Б','В','Г','Д','Е','Ё','Ж','З','И','Й','К','Л','М','Н','О','П',
+        'Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Ь','Ы','Ъ','Э','Ю','Я'
+    )
+    val numbers = listOf(
+        21,13,4,20,22,1,25,12,24,14,2,28,9,23,3,29,6,
+        16,15,11,26,5,30,27,8,18,10,33,31,32,19,7,17
+    )
+    val map = alphabet.zip(numbers).toMap()
+    val reverseMap = numbers.zip(alphabet).toMap()
+    print("Введите режим (1 - зашифровать, 2 - расшифровать): ")
+    val mode = readLine()!!.toInt()
+    print("Введите ключевое слово: ")
+    val key = readLine()!!.uppercase()
+    print("Введите текст: ")
+    val text = readLine()!!.uppercase()
+    val result = StringBuilder()
+    var keyIndex = 0
+    for (ch in text)
+    {
+        val num = map[ch] ?: continue
+        val shift = map[key[keyIndex]] ?: 0
+        val newNum = if (mode == 1)
+        {
+            (num + shift - 1) % 33 + 1
+        } else {
+            (num - shift - 1 + 33) % 33 + 1
+        }
+        result.append(reverseMap[newNum])
+        keyIndex = (keyIndex + 1) % key.length
+    }
+    println("Результат: $result")
 }
 
 fun task4()
 {
-    print("Введите выражение (ЧИСЛО1 ЧИСЛО2 ОПЕРАЦИЯ): ")
-    val input = readLine()?.split(" ") ?: return
-    if (input.size != 3) {
-        println("Неверный формат ввода")
-        return
-    }
-
-    val num_1 = input[0].toDoubleOrNull()
-    val num_2 = input[1].toDoubleOrNull()
-    val sign = input[2]
-
-    if (num_1 == null || num_2 == null) {
-        println("Ошибка: числа введены неверно")
-        return
-    }
-
-    val result: Any = when (sign) {
-        "+" -> num_1 + num_2
-        "-" -> num_1 - num_2
-        "*" -> num_1 * num_2
-        "/" -> if (num_2 != 0.0) num_1 / num_2 else return println("Ошибка: деление на ноль!")
-        else -> return println("Неизвестная операция")
-    }
-
-// Проверяем результат: если без дробной части — выводим как Int
-    if (result is Double) {
-        if (result % 1.0 == 0.0) {
-            println("Результат: ${result.toInt()}")
-        } else {
-            println("Результат: $result")
-        }
-    } else {
-        println("Результат: $result")
-    }
-}
-fun task5() {
-    print("Введите число n: ")
-    val n = readLine()?.toIntOrNull() ?: return
-    print("Введите основание степени x: ")
-    val x = readLine()?.toIntOrNull() ?: return
-    var found = false
-    for (y in 1..100) { // ограничим перебор
-        if (x.toDouble().pow(y.toDouble()).toInt() == n)
+    println("Введите первый массив через пробел:")
+    val arr1 = readLine()!!.split(" ").map { it.toInt() }
+    println("Введите второй массив через пробел:")
+    val arr2 = readLine()!!.split(" ").map { it.toInt() }
+    val result = mutableListOf<Int>()
+    val arr2Copy = arr2.toMutableList()
+    for (num in arr1)
+    {
+        if (arr2Copy.contains(num))
         {
-            println("Целочисленный показатель существует: y = $y")
-            found = true
-            break
+            result.add(num)
+            arr2Copy.remove(num)
         }
     }
-    if (!found) println("Целочисленный показатель не существует")
+    println("Пересечение массивов: $result")
+
+}
+fun task5()
+{
+    println("Введите слова через пробел:")
+    val words = readLine()!!.split(" ")
+    val groups = mutableMapOf<String, MutableList<String>>()
+    for (word in words) {
+        val key = word.toCharArray().sorted().joinToString("")
+        groups.computeIfAbsent(key) { mutableListOf() }.add(word)
+    }
+    println("Группы слов:")
+    for (group in groups.values)
+    {
+        println(group.joinToString(", "))
+    }
 }
